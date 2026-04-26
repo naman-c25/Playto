@@ -6,13 +6,15 @@ from .base import *  # noqa: F401, F403
 
 DEBUG = False
 
-ALLOWED_HOSTS = env("ALLOWED_HOSTS", default="").split(",")
+_allowed = env("ALLOWED_HOSTS", default="")
+ALLOWED_HOSTS = [h.strip() for h in _allowed.split(",") if h.strip()] or ["*"]
 
-# HTTPS enforcement
-# Railway (and most PaaS) terminate SSL at their proxy and forward HTTP internally.
-# This header tells Django the original request was HTTPS, so redirects work correctly.
+# Railway terminates SSL at the edge and forwards plain HTTP internally.
+# SECURE_PROXY_SSL_HEADER lets Django know the original request was HTTPS.
+# SECURE_SSL_REDIRECT must be False — Railway's healthcheck hits the container
+# directly over HTTP and would get a redirect loop otherwise.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SECURE_SSL_REDIRECT = env("SECURE_SSL_REDIRECT", default=True, cast=bool)
+SECURE_SSL_REDIRECT = env("SECURE_SSL_REDIRECT", default=False, cast=bool)
 SECURE_HSTS_SECONDS = 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True

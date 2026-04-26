@@ -1,3 +1,0 @@
-[deploy]
-healthcheckPath = "/api/v1/health/"
-healthcheckTimeout = 60

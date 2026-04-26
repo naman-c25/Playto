@@ -8,6 +8,7 @@ python-decouple==3.8
 gunicorn==23.0.0
 whitenoise==6.8.2
 django-extensions==3.2.3
+dj-database-url==2.3.0
 
 # Testing
 pytest==8.3.4

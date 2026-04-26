@@ -1,4 +1,3 @@
 [deploy]
-startCommand = "/bin/sh /app/start.sh"
 healthcheckPath = "/api/v1/health/"
 healthcheckTimeout = 60

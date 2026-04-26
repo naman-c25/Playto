@@ -9,6 +9,9 @@ DEBUG = False
 ALLOWED_HOSTS = env("ALLOWED_HOSTS", default="").split(",")
 
 # HTTPS enforcement
+# Railway (and most PaaS) terminate SSL at their proxy and forward HTTP internally.
+# This header tells Django the original request was HTTPS, so redirects work correctly.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = env("SECURE_SSL_REDIRECT", default=True, cast=bool)
 SECURE_HSTS_SECONDS = 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True

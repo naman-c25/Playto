@@ -253,9 +253,11 @@ def transition(payout, to_status: str) -> None:
 
 `failed → completed` is blocked because `VALID_TRANSITIONS["failed"]` is an empty set. `"completed" not in set()` is always `True`, so `InvalidStateTransition` is always raised.
 
-Every state change in `tasks.py` goes through `transition()` before `payout.save()`. There is no path in the codebase that writes `payout.status = "completed"` directly.
+Every forward state change in `tasks.py` goes through `transition()` before `payout.save()`. There is no path in the codebase that writes `payout.status = "completed"` directly.
 
 The function mutates `payout.status` in memory but does not save. The caller always saves inside an `atomic()` block, so an `InvalidStateTransition` raised before the save means the bad state never reaches the database.
+
+**The one deliberate exception: `detect_stuck_payouts` resets `PROCESSING → PENDING` directly**, bypassing `transition()`. This is correct: `PROCESSING → PENDING` is a retry reset, not a forward transition. The state machine is intentionally forward-only — `"pending"` is not in `VALID_TRANSITIONS["processing"]`, so calling `transition()` would raise `InvalidStateTransition`. The retry reset gets equivalent safety from a `SELECT FOR UPDATE` lock and an explicit `status == PROCESSING` guard before writing.
 
 ---
 

@@ -90,9 +90,8 @@ def _handle_idempotency(merchant: Merchant, raw_key: str, request_body: dict):
     Idempotency gate.
 
     Returns one of:
-      - (None, None)              → key is fresh, caller should proceed
-      - (response_body, status)   → key seen before, caller should return cached response
-      - raises nothing            → all errors surface as return tuples
+      - (None, record)           → key is fresh; record is the new IdempotencyKey instance
+      - (response_body, status)  → key seen before (replay) or validation error; caller returns this directly
     """
     # Validate UUID format
     try:
@@ -201,10 +200,6 @@ class PayoutCreateView(APIView):
         idempotency_result, idempotency_meta = _handle_idempotency(merchant, raw_key, request_body)
 
         if idempotency_result is not None:
-            # Either a cached response (int status) or an error tuple
-            if isinstance(idempotency_meta, int):
-                return Response(idempotency_result, status=idempotency_meta)
-            # Error from validation inside _handle_idempotency
             return Response(idempotency_result, status=idempotency_meta)
 
         # idempotency_meta is the newly created IdempotencyKey record

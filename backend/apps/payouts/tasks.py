@@ -218,6 +218,13 @@ def detect_stuck_payouts() -> dict:
                 locked = Payout.objects.select_for_update().get(pk=payout.pk)
                 if locked.status != Payout.PROCESSING:
                     continue  # already handled by another beat instance
+                # Intentionally bypass transition() here.
+                # PROCESSING → PENDING is a retry reset, not a forward transition.
+                # The state machine only enforces forward movement; the retry
+                # mechanism needs to move backward. Calling transition() would
+                # raise InvalidStateTransition because "pending" is not in
+                # VALID_TRANSITIONS["processing"]. The guard above (status check
+                # + lock) provides equivalent safety.
                 locked.status = Payout.PENDING
                 locked.processing_started_at = None
                 locked.save(update_fields=["status", "processing_started_at", "updated_at"])

@@ -2,7 +2,6 @@
 
 A production-grade payout engine for the Playto Pay platform — handling merchant balance ledgers, payout requests, concurrency safety, and idempotent APIs.
 
-> **Live demo:** [deployment-url-here]
 > **Stack:** Django · PostgreSQL · Celery · Redis · React · Tailwind CSS · Docker
 
 ---
@@ -53,8 +52,8 @@ A production-grade payout engine for the Playto Pay platform — handling mercha
 ## Quick Start (Docker)
 
 ```bash
-git clone https://github.com/your-handle/playto-payout-engine
-cd playto-payout-engine
+git clone https://github.com/naman-c25/Playto
+cd Playto
 cp .env.example .env
 
 docker-compose up --build

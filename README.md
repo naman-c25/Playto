@@ -10,12 +10,27 @@ A production-grade payout engine for the Playto Pay platform — handling mercha
 
 | Surface | URL |
 |---|---|
-| Frontend | https://playto-pi.vercel.app |
-| Backend API | https://playto-production-aec1.up.railway.app/api/v1 |
-| Health check | https://playto-production-aec1.up.railway.app/api/v1/health/ |
+| Frontend dashboard | https://playto-pi.vercel.app |
+| Backend base URL | `https://playto-production-aec1.up.railway.app` |
+| API prefix | `/api/v1/` (hitting just `/api/v1` returns 404 — this is correct, the prefix isn't a route) |
+
+**Endpoints you can hit directly:**
+
+```
+GET  https://playto-production-aec1.up.railway.app/api/v1/health/
+GET  https://playto-production-aec1.up.railway.app/api/v1/merchants/
+GET  https://playto-production-aec1.up.railway.app/api/v1/merchants/1/balance/
+GET  https://playto-production-aec1.up.railway.app/api/v1/merchants/1/payouts/
+GET  https://playto-production-aec1.up.railway.app/api/v1/merchants/1/ledger/
+```
 
 **Hosting:** Vercel (frontend) · Railway (Django + Postgres + Redis + Celery worker + Celery beat).
-The Railway project runs five services that communicate over its private network: the web service serves the API, Celery worker consumes the payout queue, Celery beat schedules the stuck-payout detector and idempotency-key cleanup, and Postgres + Redis are managed services.
+The Railway project runs five services on its private network:
+- **Playto** — gunicorn serving the Django REST API
+- **celery-worker** — consumes the payout queue, calls the simulated bank API
+- **celery-beat** — fires `detect_stuck_payouts` every 15s and `cleanup_expired_idempotency_keys` hourly
+- **Postgres** — managed database
+- **Redis** — Celery broker + result backend
 
 ---
 

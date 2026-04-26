@@ -8,6 +8,11 @@ DEBUG = False
 
 _allowed = env("ALLOWED_HOSTS", default="")
 ALLOWED_HOSTS = [h.strip() for h in _allowed.split(",") if h.strip()] or ["*"]
+# Railway sends internal healthcheck requests with Host: healthcheck.railway.app
+# and routes traffic from *.up.railway.app domains. Always permit both.
+for _host in ("healthcheck.railway.app", ".railway.app", ".up.railway.app"):
+    if _host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(_host)
 
 # Railway terminates SSL at the edge and forwards plain HTTP internally.
 # SECURE_PROXY_SSL_HEADER lets Django know the original request was HTTPS.

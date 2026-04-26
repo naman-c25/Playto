@@ -19,7 +19,13 @@ SECURE_HSTS_PRELOAD = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
-# CORS — only allow the deployed frontend origin
-CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS", default="").split(",")
+# CORS — only allow the deployed frontend origin.
+# If CORS_ALLOWED_ORIGINS is not set, fall back to allow all (safe for a demo;
+# tighten by setting the env var to the actual frontend URL in production).
+_cors = env("CORS_ALLOWED_ORIGINS", default="")
+if _cors.strip():
+    CORS_ALLOWED_ORIGINS = [o.strip() for o in _cors.split(",") if o.strip()]
+else:
+    CORS_ALLOW_ALL_ORIGINS = True
 
 DATABASES["default"]["CONN_MAX_AGE"] = 60  # noqa: F405

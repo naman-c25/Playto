@@ -6,6 +6,19 @@ A production-grade payout engine for the Playto Pay platform — handling mercha
 
 ---
 
+## Live Deployment
+
+| Surface | URL |
+|---|---|
+| Frontend | https://playto-pi.vercel.app |
+| Backend API | https://playto-production-aec1.up.railway.app/api/v1 |
+| Health check | https://playto-production-aec1.up.railway.app/api/v1/health/ |
+
+**Hosting:** Vercel (frontend) · Railway (Django + Postgres + Redis + Celery worker + Celery beat).
+The Railway project runs five services that communicate over its private network: the web service serves the API, Celery worker consumes the payout queue, Celery beat schedules the stuck-payout detector and idempotency-key cleanup, and Postgres + Redis are managed services.
+
+---
+
 ## Architecture Overview
 
 ```

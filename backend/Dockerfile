@@ -13,9 +13,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+# Fix Windows CRLF line endings and make start.sh executable
+RUN sed -i 's/\r//' start.sh && chmod +x start.sh
+
 # Collect static files for whitenoise
 RUN python manage.py collectstatic --noinput --settings=config.settings.production || true
 
 EXPOSE 8000
 
-CMD echo "=== MIGRATE ===" && python manage.py migrate --noinput && echo "=== SEED ===" && (python manage.py shell < scripts/seed.py || echo "seed failed, continuing") && echo "=== GUNICORN PORT=${PORT} ===" && exec gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120 --log-level debug
+CMD ["/bin/sh", "/app/start.sh"]

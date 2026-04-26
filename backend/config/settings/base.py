@@ -68,13 +68,9 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 _database_url = config("DATABASE_URL", default="")
 if _database_url:
-    DATABASES = {
-        "default": dj_database_url.parse(
-            _database_url,
-            conn_max_age=600,
-            options={"options": "-c timezone=UTC"},
-        )
-    }
+    _db_config = dj_database_url.parse(_database_url, conn_max_age=600)
+    _db_config.setdefault("OPTIONS", {})["options"] = "-c timezone=UTC"
+    DATABASES = {"default": _db_config}
 else:
     DATABASES = {
         "default": {

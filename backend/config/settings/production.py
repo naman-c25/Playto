@@ -35,4 +35,12 @@ if _cors.strip():
 else:
     CORS_ALLOW_ALL_ORIGINS = True
 
+# Custom headers the frontend sends — must be allowed at the preflight stage,
+# otherwise the browser blocks the request before it reaches Django.
+from corsheaders.defaults import default_headers
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "x-merchant-id",
+    "idempotency-key",
+]
+
 DATABASES["default"]["CONN_MAX_AGE"] = 60  # noqa: F405

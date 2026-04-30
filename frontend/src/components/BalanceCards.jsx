@@ -46,8 +46,8 @@ export default function BalanceCards({ balance }) {
       />
       <Card
         label="Total Earned"
-        inr={balance.total_balance_inr}
-        paise={balance.total_balance_paise}
+        inr={balance.total_earned_inr}
+        paise={balance.total_earned_paise}
         color="border-blue-100"
         icon="📈"
       />

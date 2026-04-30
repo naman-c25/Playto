@@ -51,6 +51,7 @@ class MerchantBalanceView(APIView):
         total_balance = self._compute_ledger_balance(merchant)
         held_balance = self._compute_held_balance(merchant)
         available_balance = total_balance - held_balance
+        total_earned = self._compute_total_earned(merchant)
 
         return Response(
             {
@@ -59,10 +60,12 @@ class MerchantBalanceView(APIView):
                 "total_balance_paise": total_balance,
                 "held_balance_paise": held_balance,
                 "available_balance_paise": available_balance,
+                "total_earned_paise": total_earned,
                 # Human-readable INR strings for the UI
                 "total_balance_inr": f"{total_balance / 100:.2f}",
                 "held_balance_inr": f"{held_balance / 100:.2f}",
                 "available_balance_inr": f"{available_balance / 100:.2f}",
+                "total_earned_inr": f"{total_earned / 100:.2f}",
             }
         )
 
@@ -82,6 +85,18 @@ class MerchantBalanceView(APIView):
                 )
             )
         )
+        return result["total"] or 0
+
+    @staticmethod
+    def _compute_total_earned(merchant: Merchant) -> int:
+        """
+        Lifetime gross earnings — sum of all CREDIT entries only.
+        Unlike total_balance, this does NOT decrease when the merchant withdraws.
+        """
+        result = LedgerEntry.objects.filter(
+            merchant=merchant,
+            entry_type=LedgerEntry.CREDIT,
+        ).aggregate(total=Sum("amount_paise"))
         return result["total"] or 0
 
     @staticmethod

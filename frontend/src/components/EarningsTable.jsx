@@ -1,5 +1,6 @@
 import React from "react";
 import { formatDistanceToNow, format } from "date-fns";
+import { computeRunningBalances, formatInr } from "../utils/runningBalance";
 
 const SOURCE_ICONS = {
   "Client payment": "🧾",
@@ -42,6 +43,10 @@ function ConversionBadge({ usdAmount, exchangeRate, amountInr }) {
 
 export default function EarningsTable({ entries, loading }) {
   const credits = entries.filter((e) => e.entry_type === "credit");
+  // Running balance is computed across the full ledger (incl. debits) so that
+  // a credit's "balance after" reflects payouts that happened between credits.
+  const balances = computeRunningBalances(entries);
+
 
   const totalPaise = credits.reduce((sum, e) => sum + e.amount_paise, 0);
   const totalInr = (totalPaise / 100).toFixed(2);
@@ -105,7 +110,7 @@ export default function EarningsTable({ entries, loading }) {
           <table className="min-w-full divide-y divide-gray-100">
             <thead className="bg-gray-50">
               <tr>
-                {["Source", "Reference", "Amount (USD → INR)", "Received"].map((h) => (
+                {["Source", "Reference", "Amount (USD → INR)", "Balance After", "Received"].map((h) => (
                   <th
                     key={h}
                     className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
@@ -140,6 +145,11 @@ export default function EarningsTable({ entries, loading }) {
                         exchangeRate={e.exchange_rate_display}
                         amountInr={e.amount_inr}
                       />
+                    </td>
+
+                    {/* Running balance after this credit was applied */}
+                    <td className="px-4 py-3 text-sm font-semibold text-gray-700 whitespace-nowrap">
+                      {balances.has(e.id) ? formatInr(balances.get(e.id)) : "—"}
                     </td>
 
                     {/* Date */}

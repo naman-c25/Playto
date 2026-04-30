@@ -1,7 +1,10 @@
 import React from "react";
 import { formatDistanceToNow } from "date-fns";
+import { computeRunningBalances, formatInr } from "../utils/runningBalance";
 
 export default function LedgerTable({ entries, loading }) {
+  const balances = computeRunningBalances(entries);
+
   if (loading && entries.length === 0) {
     return (
       <div className="space-y-2">
@@ -26,7 +29,7 @@ export default function LedgerTable({ entries, loading }) {
         <table className="min-w-full divide-y divide-gray-100">
           <thead className="bg-gray-50">
             <tr>
-              {["Type", "Amount", "Description", "When"].map((h) => (
+              {["Type", "Amount", "Balance After", "Description", "When"].map((h) => (
                 <th
                   key={h}
                   className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
@@ -58,6 +61,9 @@ export default function LedgerTable({ entries, loading }) {
                     }`}
                   >
                     {isCredit ? "+" : "-"}₹{e.amount_inr}
+                  </td>
+                  <td className="px-4 py-3 text-sm font-semibold text-gray-700 whitespace-nowrap">
+                    {balances.has(e.id) ? formatInr(balances.get(e.id)) : "—"}
                   </td>
                   <td className="max-w-xs px-4 py-3 text-sm text-gray-600 truncate">
                     {e.description}
